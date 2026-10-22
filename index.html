@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRP-317 · AI-Powered Maritime Security &amp; Vessel Monitoring — Operational Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="sheet">
+
+  <!-- ══════════════ MASTHEAD ══════════════ -->
+  <header class="masthead">
+    <div class="masthead__id">
+      <div class="masthead__code">Sheet 317 &nbsp;·&nbsp; Maritime Domain Awareness Console &nbsp;·&nbsp; WGS-84</div>
+      <h1 class="masthead__title">AI-Powered Maritime Security &amp; Vessel Monitoring</h1>
+      <div class="masthead__sub">AIS Analytics &nbsp;·&nbsp; Anomaly Detection &nbsp;·&nbsp; Trajectory Prediction</div>
+    </div>
+    <div class="masthead__side">
+      <div class="masthead__chips">
+        <span class="chip chip--live"><i class="pulse"></i>LIVE FEED</span>
+        <span class="chip">AIS INGEST <b id="rateTop">1,246</b> msg/min</span>
+        <span class="chip">PIPELINE LATENCY <b id="latTop">218</b> ms</span>
+        <span class="chip">MODELS <b>5/5</b> SERVING</span>
+      </div>
+      <div class="clocks">
+        <div class="clock"><span class="clock__val" id="clockUtc">--:--:--</span><span class="clock__zone">UTC</span></div>
+        <div class="clock clock--sep"><span class="clock__val" id="clockIst">--:--:--</span><span class="clock__zone">IST</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════ PIPELINE RIBBON ══════════════ -->
+  <nav class="ribbon" aria-label="Processing pipeline status">
+    <div class="ribbon__stage"><span class="ribbon__n">01</span><span class="ribbon__label">Ingest</span><span class="ribbon__val">AIS · SAR · Radar</span></div>
+    <span class="ribbon__flow"></span>
+    <div class="ribbon__stage"><span class="ribbon__n">02</span><span class="ribbon__label">Validate &amp; Clean</span><span class="ribbon__val">98.4% pass rate</span></div>
+    <span class="ribbon__flow"></span>
+    <div class="ribbon__stage"><span class="ribbon__n">03</span><span class="ribbon__label">Feature Store</span><span class="ribbon__val">27 engineered features</span></div>
+    <span class="ribbon__flow"></span>
+    <div class="ribbon__stage"><span class="ribbon__n">04</span><span class="ribbon__label">Model Inference</span><span class="ribbon__val">RF · LSTM · DBSCAN · CNN · IF</span></div>
+    <span class="ribbon__flow"></span>
+    <div class="ribbon__stage"><span class="ribbon__n">05</span><span class="ribbon__label">Alert &amp; Report</span><span class="ribbon__val"><b id="alertCount">5</b> open · 2 critical</span></div>
+    <span class="ribbon__flow"></span>
+    <div class="ribbon__stage ribbon__stage--last"><span class="ribbon__n">06</span><span class="ribbon__label">Command Dashboard</span><span class="ribbon__val">Operator: MDA Desk</span></div>
+  </nav>
+
+  <!-- ══════════════ MAIN GRID ══════════════ -->
+  <main class="grid-main">
+
+    <!-- ── LEFT COLUMN ── -->
+    <div class="col col--left">
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">Alert Queue</h2>
+          <span class="panel__meta">Isolation Forest + rule engine</span>
+        </div>
+        <ul class="alerts" id="alertList"></ul>
+      </section>
+
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">Data Sources</h2>
+          <span class="panel__meta">fusion layer</span>
+        </div>
+        <ul class="feed" id="feedList">
+          <li class="feed__row"><i class="feed__dot feed__dot--ok"></i><span class="feed__name">Coastal AIS Station A-1</span><span class="feed__stat">642 msg/min</span></li>
+          <li class="feed__row"><i class="feed__dot feed__dot--ok"></i><span class="feed__name">Satellite AIS (L-Band)</span><span class="feed__stat">318 msg/min</span></li>
+          <li class="feed__row"><i class="feed__dot feed__dot--ok"></i><span class="feed__name">X-Band Radar Overlay</span><span class="feed__stat">12 rpm · 48 tracks</span></li>
+          <li class="feed__row"><i class="feed__dot feed__dot--warn"></i><span class="feed__name">SAR / Optical Imagery</span><span class="feed__stat">revisit 6 h</span></li>
+          <li class="feed__row"><i class="feed__dot feed__dot--ok"></i><span class="feed__name">Vessel Image Corpus</span><span class="feed__stat">12,480 frames</span></li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">AIS Ingest Rate</h2>
+          <span class="panel__meta">msg/min · last 24 h</span>
+        </div>
+        <div class="mini"><svg id="ingestSvg" viewBox="0 0 300 132" preserveAspectRatio="none" aria-label="AIS ingest rate chart"></svg></div>
+      </section>
+    </div>
+
+    <!-- ── CENTER: OPERATIONAL CHART ── -->
+    <div class="col col--center">
+      <section class="panel panel--chart">
+        <div class="panel__head">
+          <h2 class="panel__title">Operational Chart &nbsp;—&nbsp; Palk Bay / Gulf of Mannar</h2>
+          <span class="panel__meta">sim rate 240× &nbsp;·&nbsp; positions via AIS + radar fusion</span>
+        </div>
+        <div class="chartwrap">
+          <canvas id="chartCanvas"></canvas>
+          <div class="chart-legend">
+            <span class="lg lg--ok">▮ tracked vessel</span>
+            <span class="lg lg--watch">▮ watch</span>
+            <span class="lg lg--anom">▮ anomaly</span>
+            <span class="lg lg--pred">▬ LSTM forecast</span>
+            <span class="lg lg--zone">▭ restricted zone</span>
+          </div>
+          <div class="layers" id="layers">
+            <label class="layer"><input type="checkbox" data-layer="trails" checked> Trails</label>
+            <label class="layer"><input type="checkbox" data-layer="forecast" checked> Forecast</label>
+            <label class="layer"><input type="checkbox" data-layer="clusters" checked> DBSCAN</label>
+            <label class="layer"><input type="checkbox" data-layer="zone" checked> Geofence</label>
+            <label class="layer"><input type="checkbox" data-layer="soundings" checked> Soundings</label>
+          </div>
+          <div class="chart-tip" id="chartTip"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── RIGHT COLUMN ── -->
+    <div class="col col--right">
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">Vessel Dossier</h2>
+          <span class="panel__meta">click any contact</span>
+        </div>
+        <div class="dossier" id="dossier">
+          <div class="dossier__id">
+            <div class="dossier__name" id="dName">MV Ocean Pioneer</div>
+            <div class="dossier__meta"><span id="dType">Cargo</span> · <span id="dFlag">IN</span> · <span id="dMmsi">419203456</span></div>
+          </div>
+          <div class="kv"><span class="kv__k">IMO / Call sign</span><span class="kv__lead"></span><span class="kv__v mono" id="dImo">9482761 / 9V2841</span></div>
+          <div class="kv"><span class="kv__k">Length × Draught</span><span class="kv__lead"></span><span class="kv__v mono" id="dDim">182 m × 9.4 m</span></div>
+          <div class="kv"><span class="kv__k">Position (WGS-84)</span><span class="kv__lead"></span><span class="kv__v mono" id="dPos">09°37.2′N 079°44.4′E</span></div>
+          <div class="kv"><span class="kv__k">SOG / COG</span><span class="kv__lead"></span><span class="kv__v mono" id="dNav">13.2 kn / 078°</span></div>
+          <div class="kv"><span class="kv__k">Navigational status</span><span class="kv__lead"></span><span class="kv__v" id="dStatus">Under way using engine</span></div>
+
+          <div class="sub">Classification confidence</div>
+          <div class="conf"><span class="conf__k">Random Forest</span><span class="conf__track"><span class="conf__fill" id="dRf" style="width:97%"></span></span><span class="conf__v mono" id="dRfV">0.97</span></div>
+          <div class="conf"><span class="conf__k">CNN (hull image)</span><span class="conf__track"><span class="conf__fill conf__fill--alt" id="dCnn" style="width:93%"></span></span><span class="conf__v mono" id="dCnnV">0.93</span></div>
+
+          <div class="sub">Anomaly score <em>Isolation Forest</em></div>
+          <div class="gauge">
+            <div class="gauge__track"><div class="gauge__fill" id="dAnom" style="width:14%"></div><div class="gauge__mark" title="alert threshold 0.65"></div></div>
+            <div class="gauge__cap"><span class="mono">0.00</span><span class="gauge__thr mono">threshold 0.65</span><span class="mono">1.00</span></div>
+          </div>
+
+          <div class="sub">Last AIS fixes</div>
+          <ul class="fixes" id="dFixes"></ul>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">Track Forecast</h2>
+          <span class="panel__meta">LSTM · t+60 min</span>
+        </div>
+        <div class="mini mini--forecast"><svg id="forecastSvg" viewBox="0 0 300 178" preserveAspectRatio="xMidYMid meet" aria-label="LSTM trajectory forecast"></svg></div>
+        <div class="capnote">Solid: observed track · Dashed: LSTM forecast · Shaded: 90% confidence envelope · ○ forecast nodes at t+15/30/45/60</div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ══════════════ VESSEL TRAFFIC TABLE ══════════════ -->
+  <section class="panel">
+    <div class="panel__head">
+      <h2 class="panel__title">Vessel Traffic &nbsp;—&nbsp; Classification &amp; Status</h2>
+      <span class="panel__meta"><b id="tblCount">16</b> contacts in sector &nbsp;·&nbsp; sorted by anomaly score</span>
+    </div>
+    <div class="tablewrap">
+      <table class="data" id="vesselTable">
+        <thead>
+          <tr>
+            <th>MMSI</th><th>Vessel</th><th>Type</th><th>Flag</th>
+            <th>Position</th><th class="num">SOG</th><th class="num">COG</th>
+            <th>Classifier</th><th>Anomaly score</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="vesselRows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════ MODEL EVALUATION + ANALYTICS ══════════════ -->
+  <div class="grid-two">
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">Model Evaluation &nbsp;—&nbsp; Held-out Test Set</h2>
+        <span class="panel__meta">k-fold cross-validation, k = 5</span>
+      </div>
+      <table class="data data--models">
+        <thead>
+          <tr><th>Model</th><th>Task</th><th class="num">Accuracy</th><th class="num">Precision</th><th class="num">Recall</th><th class="num">F1</th><th>Profile</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Random Forest</b><span class="td-sub">200 trees · depth 12</span></td>
+            <td>Vessel type classification</td>
+            <td class="num">96.4%</td><td class="num">95.8%</td><td class="num">95.1%</td><td class="num">95.4%</td>
+            <td><span class="bar"><i style="width:96.4%"></i></span></td>
+          </tr>
+          <tr>
+            <td><b>LSTM</b><span class="td-sub">2 × 128 units · seq 30</span></td>
+            <td>Trajectory prediction (MAE 0.041° · RMSE 0.063°)</td>
+            <td class="num">93.1%</td><td class="num">92.4%</td><td class="num">91.8%</td><td class="num">92.1%</td>
+            <td><span class="bar"><i style="width:93.1%"></i></span></td>
+          </tr>
+          <tr>
+            <td><b>DBSCAN</b><span class="td-sub">ε = 0.35 · minPts = 6</span></td>
+            <td>Behaviour clustering (silhouette 0.71)</td>
+            <td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">0.71*</td>
+            <td><span class="bar bar--muted"><i style="width:71%"></i></span></td>
+          </tr>
+          <tr>
+            <td><b>CNN</b><span class="td-sub">VGG-style · 5 conv blocks</span></td>
+            <td>Image-based vessel classification</td>
+            <td class="num">93.7%</td><td class="num">92.9%</td><td class="num">92.2%</td><td class="num">92.5%</td>
+            <td><span class="bar"><i style="width:93.7%"></i></span></td>
+          </tr>
+          <tr>
+            <td><b>Isolation Forest</b><span class="td-sub">n = 300 · contamination 0.05</span></td>
+            <td>Anomaly detection on AIS behaviour</td>
+            <td class="num">94.2%</td><td class="num">91.6%</td><td class="num">93.8%</td><td class="num">92.7%</td>
+            <td><span class="bar"><i style="width:94.2%"></i></span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="capnote">* silhouette coefficient for clustering quality. Metrics computed on a 70/15/15 train–validation–test split of 48,600 AIS records; regression tasks additionally reported as MAE / RMSE.</div>
+    </section>
+
+    <div class="col">
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">Behaviour Clusters</h2>
+          <span class="panel__meta">DBSCAN · SOG vs COG</span>
+        </div>
+        <div class="mini"><svg id="dbscanSvg" viewBox="0 0 300 178" preserveAspectRatio="xMidYMid meet" aria-label="DBSCAN clustering scatter"></svg></div>
+      </section>
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">Anomaly Score Distribution</h2>
+          <span class="panel__meta">Isolation Forest · 24 h</span>
+        </div>
+        <div class="mini"><svg id="anomSvg" viewBox="0 0 300 128" preserveAspectRatio="none" aria-label="Anomaly score histogram"></svg></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ══════════════ SYSTEM ARCHITECTURE ══════════════ -->
+  <section class="panel">
+    <div class="panel__head">
+      <h2 class="panel__title">System Architecture</h2>
+      <span class="panel__meta">end-to-end inference pipeline</span>
+    </div>
+    <div class="arch">
+      <svg id="archSvg" viewBox="0 0 1180 172" preserveAspectRatio="xMidYMid meet" aria-label="System architecture diagram"></svg>
+    </div>
+  </section>
+
+  <!-- ══════════════ FOOTER ══════════════ -->
+  <footer class="foot">
+    <div class="foot__meta">
+      <div class="foot__title">Next-Gen Maritime Security — Precision Detection &amp; Monitoring of Vessels Using Advanced AIS Analytics</div>
+      <div class="foot__grid">
+        <div><span class="foot__k">Project code</span> CRP-317</div>
+        <div><span class="foot__k">Team</span> Keerthiga K · Jolin Ashika J · Narmadha M</div>
+        <div><span class="foot__k">Department</span> Electronics &amp; Communication Engineering</div>
+        <div><span class="foot__k">Institution</span> IFET College of Engineering, Villupuram, India</div>
+        <div><span class="foot__k">Algorithms</span> Random Forest · LSTM · DBSCAN · CNN · Isolation Forest</div>
+        <div><span class="foot__k">Domains</span> Maritime security · SAR support · Environmental protection · Traffic management</div>
+      </div>
+    </div>
+    <div class="foot__colophon">
+      <div class="mono">AIS ANALYTICS CONSOLE v1.0</div>
+      <div class="mono">DATUM WGS-84 · DEPTHS IN METRES · TIME UTC</div>
+      <div class="mono">SHEET 317 · REV 03 · FOR ACADEMIC REVIEW</div>
+    </div>
+  </footer>
+
+</div>
+<script src="app.js"></script>
+</body>
+</html>
