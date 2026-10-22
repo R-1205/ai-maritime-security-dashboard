@@ -1,0 +1,15 @@
+{
+  "name": "crp-317-maritime-dashboard",
+  "version": "1.0.0",
+  "description": "AI-Powered Maritime Security & Vessel Monitoring — AIS analytics, anomaly detection and trajectory prediction dashboard (CRP-317)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": ["maritime", "ais", "anomaly-detection", "lstm", "vessel-monitoring"],
+  "license": "MIT",
+  "private": true
+}

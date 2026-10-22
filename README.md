@@ -45,16 +45,43 @@ A professional maritime domain-awareness console styled as a digital Admiralty c
 open index.html            # macOS
 xdg-open index.html        # Linux
 
-# option 2 — serve it
-python3 -m http.server 8000
-# → http://localhost:8000
+# option 2 — run it like production (what Railway does)
+npm start                  # → http://localhost:3000
 ```
 
 No dependencies, no build step, works offline (Google Fonts load when online, with local fallbacks).
 
-## Deployment (GitHub Pages)
+## Deployment on Railway (railway.com)
 
-The repository ships with `.github/workflows/deploy.yml`, which deploys automatically on every push to `main`:
+The project is Railway-ready out of the box:
+
+- `package.json` → `npm start` runs `server.js` (zero-dependency Node static server)
+- `railway.toml` → build/start command, `/health` healthcheck, restart policy
+- `Dockerfile` → alternative container build (same `server.js`)
+- Listens on `process.env.PORT` — Railway injects it automatically
+
+**Deploy from GitHub (recommended):**
+
+1. Push this repo to GitHub.
+2. On [railway.com](https://railway.com): **New Project → Deploy from GitHub repo** → pick the repo.
+3. Railway auto-detects Node — build & deploy starts immediately.
+4. **Settings → Networking → Generate Domain** → live at `https://<project>.up.railway.app`
+
+**Deploy with the Railway CLI:**
+
+```bash
+npm i -g @railway/cli
+railway login
+railway init          # inside this folder
+railway up            # build + deploy
+railway domain        # generate a public URL
+```
+
+Health check endpoint: `GET /health` → `{ "status": "ok" }`
+
+## Deployment on GitHub Pages (static alternative)
+
+The repository also ships with `.github/workflows/deploy.yml`, which deploys the static files automatically on every push to `main`:
 
 1. Push to GitHub.
 2. Repository **Settings → Pages → Source**: select **GitHub Actions**.
@@ -66,8 +93,12 @@ The repository ships with `.github/workflows/deploy.yml`, which deploys automati
 ├── index.html                 # dashboard structure
 ├── styles.css                 # chart-table design system
 ├── app.js                     # AIS simulation, canvas chart, analytics
+├── server.js                  # zero-dep Node static server (Railway/production)
+├── package.json               # npm start → server.js
+├── railway.toml               # Railway build/deploy config + healthcheck
+├── Dockerfile                 # container build (optional)
 ├── assets/dashboard-preview.png
-└── .github/workflows/deploy.yml
+└── .github/workflows/deploy.yml   # GitHub Pages (static alternative)
 ```
 
 ## Project details
